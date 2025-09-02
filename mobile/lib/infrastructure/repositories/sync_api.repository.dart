@@ -112,8 +112,6 @@ class SyncApiRepository {
     } catch (error, stack) {
       _logger.severe("Error processing stream", error, stack);
       return Future.error(error, stack);
-    } finally {
-      _client.close();
     }
     stopwatch.stop();
     _logger.info("Remote Sync completed in ${stopwatch.elapsed.inMilliseconds}ms");
