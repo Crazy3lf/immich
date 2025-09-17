@@ -171,7 +171,7 @@ class AlbumOptionsPage extends HookConsumerWidget {
                   album.activityEnabled = value;
                 }
               },
-              activeColor: activityEnabled.value ? context.primaryColor : context.themeData.disabledColor,
+              activeThumbColor: activityEnabled.value ? context.primaryColor : context.themeData.disabledColor,
               dense: true,
               title: Text(
                 "comments_and_likes",

@@ -44,9 +44,10 @@ analyzer:
     - lib/**/*.g.dart
     - lib/**/*.drift.dart
 
-  plugins:
-    - custom_lint
-  
+  # TODO: Re-enable after upgrading custom_lint
+  # plugins:
+  #   - custom_lint
+
   errors:
     unawaited_futures: warning
 
@@ -138,6 +139,13 @@ custom_lint:
 
 dart_code_metrics:
   rules:
+    - banned-usage:
+        entries:
+          - name: debugPrint
+            description: Use dPrint instead of debugPrint for proper tree-shaking in release builds.
+            exclude-paths:
+              - 'lib/utils/debug_print.dart'
+            severity: perf
     - avoid-unused-parameters
     - prefer-const-border-radius
     - prefer-declaring-const-constructor
