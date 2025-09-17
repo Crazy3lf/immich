@@ -193,8 +193,8 @@ class LoginForm extends HookConsumerWidget {
           final isBeta = Store.isBetaTimelineEnabled;
           if (isBeta) {
             await ref.read(galleryPermissionNotifier.notifier).requestGalleryPermission();
-            handleSyncFlow();
-            context.replaceRoute(const TabShellRoute());
+            unawaited(handleSyncFlow());
+            unawaited(context.replaceRoute(const TabShellRoute()));
             return;
           }
           unawaited(context.replaceRoute(const TabControllerRoute()));
@@ -291,8 +291,8 @@ class LoginForm extends HookConsumerWidget {
             }
             if (isBeta) {
               await ref.read(galleryPermissionNotifier.notifier).requestGalleryPermission();
-              handleSyncFlow();
-              context.replaceRoute(const TabShellRoute());
+              unawaited(handleSyncFlow());
+              unawaited(context.replaceRoute(const TabShellRoute()));
               return;
             }
             unawaited(context.replaceRoute(const TabControllerRoute()));
