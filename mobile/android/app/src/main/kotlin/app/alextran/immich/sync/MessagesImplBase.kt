@@ -138,6 +138,7 @@ open class NativeSyncApiImplBase(context: Context) {
             duration,
             orientation.toLong(),
             isFavorite,
+            adjustmentTimestamp = null
           )
           yield(AssetResult.ValidAsset(asset, bucketId))
         }
