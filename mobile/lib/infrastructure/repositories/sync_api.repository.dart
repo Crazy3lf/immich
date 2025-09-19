@@ -25,8 +25,10 @@ class SyncApiRepository {
     Future<void> Function(List<SyncEvent>, Function() abort, Function() reset) onData, {
     Function()? onReset,
     int batchSize = kSyncEventBatchSize,
+    http.Client? httpClient,
   }) async {
     final stopwatch = Stopwatch()..start();
+    final client = httpClient ?? _client;
     final endpoint = "${_api.apiClient.basePath}/sync/stream";
 
     final headers = {'Content-Type': 'application/json', 'Accept': 'application/jsonlines+json'};
@@ -78,7 +80,7 @@ class SyncApiRepository {
     final reset = onReset ?? () {};
 
     try {
-      final response = await _client.send(request);
+      final response = await client.send(request);
 
       if (response.statusCode != 200) {
         final errorBody = await response.stream.bytesToString();
