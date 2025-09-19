@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -11,13 +9,12 @@ import 'package:immich_mobile/extensions/build_context_extensions.dart';
 import 'package:immich_mobile/extensions/theme_extensions.dart';
 import 'package:immich_mobile/extensions/translate_extensions.dart';
 import 'package:immich_mobile/presentation/widgets/backup/backup_toggle_button.widget.dart';
-import 'package:immich_mobile/providers/app_settings.provider.dart';
 import 'package:immich_mobile/providers/background_sync.provider.dart';
 import 'package:immich_mobile/providers/backup/backup_album.provider.dart';
 import 'package:immich_mobile/providers/backup/drift_backup.provider.dart';
+import 'package:immich_mobile/providers/sync_status.provider.dart';
 import 'package:immich_mobile/providers/user.provider.dart';
 import 'package:immich_mobile/routing/router.dart';
-import 'package:immich_mobile/services/app_settings.service.dart';
 import 'package:immich_mobile/widgets/backup/backup_info_card.dart';
 
 @RoutePage()
@@ -29,8 +26,6 @@ class DriftBackupPage extends ConsumerStatefulWidget {
 }
 
 class _DriftBackupPageState extends ConsumerState<DriftBackupPage> {
-  Timer? _countPoller;
-
   @override
   void initState() {
     super.initState();
@@ -39,40 +34,14 @@ class _DriftBackupPageState extends ConsumerState<DriftBackupPage> {
       return;
     }
 
-    if (ref.read(appSettingsServiceProvider).getSetting(AppSettingsEnum.enableBackup)) {
-      _startCountPolling();
-    }
-
-    ref.read(driftBackupProvider.notifier).getBackupStatus(currentUser.id);
-  }
-
-  void _startCountPolling() {
-    _countPoller?.cancel();
-    _countPoller = Timer.periodic(const Duration(seconds: 5), (timer) async {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-
-      final currentUser = ref.read(currentUserProvider);
-      if (currentUser == null) {
-        timer.cancel();
-        return;
-      }
-
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       await ref.read(driftBackupProvider.notifier).getBackupStatus(currentUser.id);
+      await ref.read(backgroundSyncProvider).syncRemote();
+
+      if (mounted) {
+        await ref.read(driftBackupProvider.notifier).getBackupStatus(currentUser.id);
+      }
     });
-  }
-
-  void _stopCountPolling() {
-    _countPoller?.cancel();
-    _countPoller = null;
-  }
-
-  @override
-  void dispose() {
-    _stopCountPolling();
-    super.dispose();
   }
 
   @override
@@ -83,7 +52,6 @@ class _DriftBackupPageState extends ConsumerState<DriftBackupPage> {
         .toList();
 
     final backupNotifier = ref.read(driftBackupProvider.notifier);
-    final backgroundManager = ref.read(backgroundSyncProvider);
 
     Future<void> startBackup() async {
       final currentUser = Store.tryGet(StoreKey.currentUser);
@@ -91,15 +59,12 @@ class _DriftBackupPageState extends ConsumerState<DriftBackupPage> {
         return;
       }
 
-      await backgroundManager.syncRemote();
       await backupNotifier.getBackupStatus(currentUser.id);
       await backupNotifier.startBackup(currentUser.id);
-      _startCountPolling();
     }
 
     Future<void> stopBackup() async {
       await backupNotifier.cancel();
-      _stopCountPolling();
     }
 
     return Scaffold(
@@ -276,11 +241,13 @@ class _BackupCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final backupCount = ref.watch(driftBackupProvider.select((p) => p.backupCount));
+    final syncStatus = ref.watch(syncStatusProvider);
 
     return BackupInfoCard(
       title: "backup_controller_page_backup".tr(),
       subtitle: "backup_controller_page_backup_sub".tr(),
       info: backupCount.toString(),
+      isLoading: syncStatus.isRemoteSyncing,
     );
   }
 }
@@ -291,10 +258,13 @@ class _RemainderCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final remainderCount = ref.watch(driftBackupProvider.select((p) => p.remainderCount));
+    final syncStatus = ref.watch(syncStatusProvider);
+
     return BackupInfoCard(
       title: "backup_controller_page_remainder".tr(),
       subtitle: "backup_controller_page_remainder_sub".tr(),
       info: remainderCount.toString(),
+      isLoading: syncStatus.isRemoteSyncing,
       onTap: () => context.pushRoute(const DriftBackupAssetDetailRoute()),
     );
   }
