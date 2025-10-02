@@ -599,6 +599,7 @@
   "backup_controller_page_turn_on": "Povoliť zálohovanie na popredí",
   "backup_controller_page_uploading_file_info": "Nahrávaný súbor",
   "backup_err_only_album": "Nie je možné odstrániť jediný vybraný album",
+  "backup_error_sync_failed": "Synchronizácia sa nepodarila. Nie je možné spracovať zálohu.",
   "backup_info_card_assets": "položiek",
   "backup_manual_cancelled": "Zrušené",
   "backup_manual_in_progress": "Nahrávanie už prebieha. Vyskúšajte neskôr",

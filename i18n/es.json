@@ -599,6 +599,7 @@
   "backup_controller_page_turn_on": "Activar la copia de seguridad",
   "backup_controller_page_uploading_file_info": "Subiendo información del archivo",
   "backup_err_only_album": "No se puede eliminar el único álbum",
+  "backup_error_sync_failed": "Sincronización falló. No es posible procesar la copia de seguridad.",
   "backup_info_card_assets": "elementos",
   "backup_manual_cancelled": "Cancelado",
   "backup_manual_in_progress": "Subida ya en progreso. Vuelve a intentarlo más tarde",
